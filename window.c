@@ -19,7 +19,7 @@ struct window{
     uint8_t open;
 };
 
-struct window* init( int winSize ){
+struct window* winInit( int winSize ){
     struct window *newWin;
     newWin = (struct window*)malloc(sizeof(struct window));
 

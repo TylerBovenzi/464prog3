@@ -13,7 +13,7 @@ struct frame;
 
 struct window;
 
-struct window* init( int winSize );
+struct window* winInit( int winSize );
 
 void printMetaData(struct window* win);
 
