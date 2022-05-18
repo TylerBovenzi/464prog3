@@ -10,11 +10,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
-#include <strings.h>
+#include <strings.h>/home/tyler/Desktop
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include "PDU.h"
+#include "pdu.h"
 #include "gethostbyname.h"
 #include "networks.h"
 #include "safeUtil.h"
