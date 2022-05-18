@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
-#include <strings.h>/home/tyler/Desktop
+#include <strings.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
@@ -36,6 +36,7 @@ int main (int argc, char *argv[])
 	int portNumber = 0;
 	double errorRate = 0;
     checkArgs(argc, argv, &portNumber, &errorRate);
+    //errorRate = 0;
     sendtoErr_init(errorRate, DROP_ON, FLIP_ON, DEBUG_ON, RSEED_OFF);
 	socketNum = setupUdpClientToServer(&server, argv[2], portNumber);
 	
@@ -56,24 +57,27 @@ void talkToServer(int socketNum, struct sockaddr_in6 * server)
 	uint8_t pduBuf[1407];
 
 	buffer[0] = '\0';
+    int sent = 0;
 	while (buffer[0] != '.')
 	{
 		dataLen = readFromStdin(buffer);
 
 		printf("Sending: %s with len: %d\n", buffer,dataLen);
 
-        int len = createPDU(pduBuf, num, 0, buffer, dataLen);
-        outputPDU(pduBuf, len);
-        num++;
+        int len = createPDU(pduBuf, num, 3, buffer, dataLen);
 
-		sendtoErr(socketNum, buffer, dataLen, 0, (struct sockaddr *) server, serverAddrLen);
-		
-		safeRecvfrom(socketNum, buffer, MAXBUF, 0, (struct sockaddr *) server, &serverAddrLen);
-		
+
+
+		sent = sendtoErr(socketNum, pduBuf, len, 0, (struct sockaddr *) server, serverAddrLen);
+
+		dataLen = safeRecvfrom(socketNum, buffer, MAXBUF+1, 0, (struct sockaddr *) server, &serverAddrLen);
+        len = createPDU(pduBuf, num, 3, buffer, dataLen);
+        outputPDU(buffer, dataLen);
+        num++;
 		// print out bytes received
 		ipString = ipAddressToString(server);
 		printf("Server with ip: %s and port %d said it received %s\n", ipString, ntohs(server->sin6_port), buffer);
-	      
+
 	}
 }
 
@@ -108,7 +112,7 @@ void checkArgs(int argc, char * argv[],int *portNumber, double *errorRate)
     /* check command line arguments  */
 	if (argc != 4)
 	{
-		printf("usage: server error-rate host-name port-number \n", argv[0]);
+		printf("usage: server error-rate host-name port-number \n");
 		exit(1);
 	}
 	

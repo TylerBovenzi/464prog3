@@ -19,6 +19,7 @@ void printMetaData(struct window* win);
 
 void printWindow(struct window* win);
 
+uint8_t isOpen(struct window* win);
 
 uint8_t enqueue(struct window* win, uint16_t seqNum, uint16_t pduSize, uint8_t *pdu);
 

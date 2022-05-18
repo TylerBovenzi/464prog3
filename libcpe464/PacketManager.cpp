@@ -29,7 +29,7 @@ extern "C" {
 #include <sys/socket.h>
 
 #include <string.h>
-
+#include "pdu.h"
 #include <arpa/inet.h>
 // ============================================================================
 PacketManager::PacketManager() :
@@ -307,13 +307,13 @@ ssize_t PacketManager::recv_Mod(int s, void *buf, size_t len, int flags)
     uint8_t packetFlags = ((char *) buf)[6];
     MSG_PRINT("RECV         SEQ# %3u LEN %4u FLAGS %d ", seqNo, ret, packetFlags);
 	printType(packetFlags, (char *) buf);
-	
 	if (in_cksum((unsigned short *) buf, ret) != 0)
 	{
 		MSG_PRINT("  - RECV Corrupted packet");
 	}
-	
 	MSG_PRINT("\n");
+
+
     return ret;
 }
 // ============================================================================
@@ -398,7 +398,7 @@ ssize_t PacketManager::recvfrom_Mod(int s, void *buf, size_t len, int flags,
 	
 
 	MSG_PRINT("\n");
-
+    outputPDU(buf, ret);
     return ret;
 }
 // ============================================================================

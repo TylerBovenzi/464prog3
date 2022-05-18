@@ -10,7 +10,7 @@ int createPDU(uint8_t * pduBuffer, uint32_t sequenceNumber, uint8_t flag, uint8_
     pduBuffer[4] = 0;
     pduBuffer[5] = 0;
     pduBuffer[6] = flag;
-    memcpy(&pduBuffer[7], &payload[0], payloadLen);
+    memcpy(&pduBuffer[7], &payload[0], payloadLen+8);
     uint16_t cksm = in_cksum(&pduBuffer[0],payloadLen+7);
     memcpy(&pduBuffer[4], &cksm, 2);
     return payloadLen+7;
