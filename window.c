@@ -4,8 +4,8 @@
 
 struct frame{
     uint8_t valid;
-    uint16_t seqNum;
-    uint16_t pduSize;
+    uint32_t seqNum;
+    uint32_t pduSize;
     uint8_t pdu[1407];
 };
 
