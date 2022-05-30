@@ -25,6 +25,10 @@ uint8_t enqueue(struct window* win, uint16_t seqNum, uint16_t pduSize, uint8_t *
 
 uint8_t processRR(struct window* win, uint16_t seqNum);
 
-uint16_t getPDU(uint8_t* dest, struct window* win, uint16_t seqNum);
+uint8_t* getPDU(uint8_t* dest, struct window* win, uint32_t seqNum, uint32_t * pduSize, uint8_t * flag);
+
+uint32_t getCurrent(struct window* win);
+
+
 
 #endif //UDP_WINDOW_H

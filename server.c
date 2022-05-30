@@ -22,7 +22,7 @@
 #define windowSize 5
 typedef enum State STATE;
 
-struct window* win;
+struct window * win;
 
 enum State{
     START, DONE, FILENAME, SEND_DATA, WAIT_ON_ACK, TIMEOUT_ON_ACK, WAIT_ON_EOF_ACK, TIMEOUT_ON_EOF_ACK
@@ -162,12 +162,23 @@ STATE filename(Connection * client, uint8_t * buf, int32_t recv_len, int32_t * d
 
             int32_t len_read = 0;
             len_read = read(data_file, buf, buf_size);
-            if(len_read == 0){
-                //handleEOF();
+            (*seq_num)++;
+
+            if(len_read == -1){
+                perror("send_data, read error");
+                returnValue = DONE;
                 break;
             }
 
-            (*seq_num)++;
+            if(len_read == 0){
+                store_buf(win, buf, 1, END_OF_FILE, seq_num);
+                returnValue = WAIT_ON_EOF_ACK;
+                break;
+            }
+
+
+
+
             returnValue = WAIT_ON_ACK;
 
             store_buf(win, buf, len_read, DATA, seq_num);
@@ -177,12 +188,46 @@ STATE filename(Connection * client, uint8_t * buf, int32_t recv_len, int32_t * d
     return returnValue;
 }
 
+uint8_t safeSendWindow(struct window * win, Connection * client){
+    uint32_t len = 0;
+    uint8_t flag = 0;
+    uint8_t * buf = getPDU(buf, win, getCurrent(win), &len, &flag);
+    safeSendto(buf, len, client);
+    if(flag)
+    return 1;
+};
+
 STATE send_data(Connection * client, uint8_t * packet, int32_t * packet_len, int32_t data_file,
                 int32_t buf_size, uint32_t * seq_num){
     uint8_t buf[MAX_LEN];
-    int32_t len_read = 0;
+
     STATE returnValue = DONE;
 
+    if(isOpen(win)){
+        uint8_t flagSent = safeSendWindow(win, client);
+        if(flagSent != END_OF_FILE) {
+            seq_num++;
+            uint32_t len = 0;
+            uint8_t flag = 0;
+            uint32_t crc_check = recv_buf(buf, len, client->sk_num, client, &flag, &seq_num);
+
+            if(crc_check == CRC_ERROR){
+                returnValue = WAIT_ON_ACK;
+            }
+            else if(flag != ACK){
+                printf("in wait_on_ack but its not an ACK flag is: %d\n", flag);
+                returnValue = DONE;
+            }
+
+
+        } else {
+            returnValue = WAIT_ON_EOF_ACK;
+
+        }
+
+    }
+
+}
 
 
     len_read = read(data_file, buf, buf_size);

@@ -13,9 +13,9 @@ struct window{
     struct frame* frames;
     uint16_t availableSize;
     uint16_t usedSize;
-    uint16_t lower;
-    uint16_t upper;
-    uint16_t current;
+    uint32_t lower;
+    uint32_t upper;
+    uint32_t current;
     uint8_t open;
 };
 
@@ -77,8 +77,13 @@ uint8_t enqueue(struct window* win, uint16_t seqNum, uint16_t pduSize, uint8_t *
 uint8_t isOpen(struct window* win){
     return win->open;
 }
+
+uint32_t getCurrent(struct window* win){
+    return win->current;
+}
+
 uint8_t processRR(struct window* win, uint16_t seqNum){
-    if(seqNum > win->current){
+    if(seqNum > win->current || seqNum < win->current){
         return 0;
     }
     uint16_t cursor = win->lower;
@@ -94,12 +99,14 @@ uint8_t processRR(struct window* win, uint16_t seqNum){
     return 1;
 }
 
-uint8_t* getPDU(uint8_t* dest, struct window* win, uint16_t seqNum){
+
+uint8_t* getPDU(uint8_t* dest, struct window* win, uint32_t seqNum, uint32_t * pduSize){
     uint16_t cursor = win->lower;
     while(cursor < seqNum){
         cursor++;
     }
-    return &(win->frames[cursor]);
+    *pduSize = (&win->frames[cursor])->pduSize;
+    return (win->frames[cursor]).pdu;
 }
 
 
